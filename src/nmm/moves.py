@@ -73,7 +73,7 @@ def apply_move(state, move):
         new_state.on_board[state.current_player] += 1
         new_state.move_count += 1
         new_state.move_history = new_history
-
+        new_state.update_phase()
         if is_mill(new_state.board, pos):
             new_state.halfmove_clock = 0
             opponent = switch_player(state.current_player)
