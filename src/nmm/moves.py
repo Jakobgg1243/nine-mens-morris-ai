@@ -3,30 +3,6 @@ from src.nmm.game import is_mill, ADJACENCY
 def switch_player(player):
     return "O" if player == "X" else "X"
 
-def remove_piece(state, remove_pos):
-
-    new_state = state.copy()
-
-    opponent = switch_player(state.current_player)
-
-    if remove_pos not in new_state.removable_pieces:
-        return new_state
-
-    new_state.board[remove_pos] = " "
-
-    new_state.on_board[opponent] -= 1
-
-    new_state.pending_removal = False
-    new_state.removable_pieces = []
-
-    new_state.current_player = opponent
-
-    new_state.halfmove_clock = 0
-
-    new_state.update_phase()
-
-    return new_state
-
 def get_moves(state):
     moves = []
     player = state.current_player
@@ -110,57 +86,68 @@ def apply_player_move(state, move):
     move_type = move[0]
 
     if move_type == "place":
+        if move not in get_moves(state):
+            return state
+        
         _, pos = move
-
         new_state.board[pos] = state.current_player
-
         new_state.placed[state.current_player] += 1
         new_state.on_board[state.current_player] += 1
-
         new_state.move_count += 1
 
         if is_mill(new_state.board, pos):
-
             opponent = switch_player(state.current_player)
-
+            removable = get_removable_pieces(new_state, opponent)
             new_state.pending_removal = True
-            new_state.removable_pieces = get_removable_pieces(new_state, opponent)
-
+            new_state.removable_pieces = removable
+            new_state.ui_mode = "removal"
             return new_state
 
         new_state.current_player = switch_player(state.current_player)
-
         new_state.halfmove_clock += 1
-
         new_state.update_phase()
 
         return new_state
 
     elif move_type == "move":
+        if move not in get_moves(state):
+            return state
+        
         _, frm, to = move
-
         new_state.board[frm] = " "
         new_state.board[to] = state.current_player
-
         new_state.move_count += 1
 
         if is_mill(new_state.board, to):
-
             opponent = switch_player(state.current_player)
-
+            removable = get_removable_pieces(new_state, opponent)
             new_state.pending_removal = True
-            new_state.removable_pieces = get_removable_pieces(new_state, opponent)
-
+            new_state.removable_pieces = removable
+            new_state.ui_mode = "removal"
             return new_state
 
         new_state.current_player = switch_player(state.current_player)
-
         new_state.halfmove_clock += 1
-
         new_state.update_phase()
 
         return new_state
+    
+    elif move_type == "remove":
+        _, pos = move
+        if pos not in state.removable_pieces:
+            return state
+        
+        opponent = switch_player(state.current_player)
+        new_state.board[pos] = " "
+        new_state.on_board[opponent] -= 1
+        new_state.pending_removal = False
+        new_state.removable_pieces = []
+        new_state.current_player = opponent
+        new_state.halfmove_clock = 0
+        new_state.update_phase()
 
+        return new_state
+    
     return new_state
 
 def create_removal_state(base_state, remove_pos, opponent):

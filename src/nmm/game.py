@@ -31,8 +31,12 @@ class GameState:
         self.move_count = 0
         self.move_history = []          
         self.halfmove_clock = 0  
+
+        self.ui_mode = "normal"
         self.pending_removal = False
-        self.removable_pieces = []       
+        self.removable_pieces = []     
+
+        self.last_move = None
 
     def copy(self):
         new_state = GameState()
