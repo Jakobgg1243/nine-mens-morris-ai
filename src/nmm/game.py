@@ -31,8 +31,12 @@ class GameState:
         self.move_count = 0
         self.move_history = []          
         self.halfmove_clock = 0  
+
+        self.ui_mode = "normal"
         self.pending_removal = False
-        self.removable_pieces = []       
+        self.removable_pieces = []     
+
+        self.last_move = None
 
     def copy(self):
         new_state = GameState()
@@ -55,7 +59,13 @@ class GameState:
         return new_state
 
     def get_position_key(self):
-        return (tuple(self.board), self.current_player)
+        return (
+            tuple(self.board),
+            self.current_player,
+            self.phase,
+            self.pending_removal,
+            tuple(self.removable_pieces)
+        )
 
     def update_phase(self):
         if self.placed["X"] >= 9 and self.placed["O"] >= 9:
