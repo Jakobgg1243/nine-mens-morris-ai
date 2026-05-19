@@ -11,5 +11,5 @@ def handle_ai_turn():
         move = get_ai_move(st.session_state.game)
 
         if move:
-            st.session_state.game = apply_move(st.session_state.game, move)[0]
+            st.session_state.game = apply_move(st.session_state.game, move)
             st.session_state.game.last_move = move

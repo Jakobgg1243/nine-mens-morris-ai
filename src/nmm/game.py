@@ -59,7 +59,13 @@ class GameState:
         return new_state
 
     def get_position_key(self):
-        return (tuple(self.board), self.current_player)
+        return (
+            tuple(self.board),
+            self.current_player,
+            self.phase,
+            self.pending_removal,
+            tuple(self.removable_pieces)
+        )
 
     def update_phase(self):
         if self.placed["X"] >= 9 and self.placed["O"] >= 9:
